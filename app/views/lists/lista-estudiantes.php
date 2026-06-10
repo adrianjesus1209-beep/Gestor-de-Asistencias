@@ -1,8 +1,8 @@
 <!-- Fernando Ruiz. 31.083.595 -->
 
 <?php
-require_once __DIR__ . '/../../Models/Enrollment.php';
-require_once __DIR__ . '/../../Models/Section.php';
+require_once __DIR__ . '/../../models/Enrollment.php';
+require_once __DIR__ . '/../../models/Section.php';
 
 $db = Config\Database::getInstance()->getConnection();
 $enrollmentModel = new Enrollment($db);

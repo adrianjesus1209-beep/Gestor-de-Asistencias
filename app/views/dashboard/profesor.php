@@ -305,7 +305,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Obtener la primera sección del profesor (Simulado para la prueba)
         <?php 
-            require_once __DIR__ . '/../../Models/Section.php';
+            require_once __DIR__ . '/../../models/Section.php';
+            require_once __DIR__ . '/../../models/Enrollment.php';
+            require_once __DIR__ . '/../../models/ClassSession.php';
             $db = Config\Database::getInstance()->getConnection();
             $sModel = new Section($db);
             $sections = $sModel->getByTeacherId($authPayload['user_id'] ?? 0);
