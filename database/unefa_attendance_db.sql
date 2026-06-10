@@ -95,6 +95,17 @@ CREATE TABLE `section` (
   FOREIGN KEY (`default_delegate_id`) REFERENCES `user`(`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE `enrollment_request` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `student_id` int(11) NOT NULL,
+  `section_id` int(11) NOT NULL,
+  `status` enum('Pending', 'Accepted', 'Rejected') NOT NULL DEFAULT 'Pending',
+  `requested_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`student_id`) REFERENCES `user`(`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`section_id`) REFERENCES `section`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE `enrollment` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `student_id` int(11) NOT NULL,
