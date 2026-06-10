@@ -137,10 +137,28 @@ CREATE TABLE `attendance` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- INSERCIONES INICIALES
-INSERT INTO `profile` (`id`, `id_number`, `first_name`, `last_name`) 
-VALUES (1, 'V-00000000', 'Administrador', 'General');
+-- INSERCIONES INICIALES DE ESTRUCTURA
+INSERT INTO `career` (`id`, `career_code`, `career_name`) VALUES
+(1, 'SIS01', 'Ingeniería de Sistemas'),
+(2, 'ADM01', 'Administración de Desastres'),
+(3, 'ECON01', 'Economía Social');
+
+INSERT INTO `semester` (`id`, `semester_number`, `semester_name`) VALUES
+(1, 1, 'Primer Semestre'),
+(2, 2, 'Segundo Semestre');
+
+-- INSERCIONES DE USUARIOS INICIALES (ADMIN Y TEST)
+INSERT INTO `profile` (`id`, `id_number`, `first_name`, `last_name`, `career_id`) 
+VALUES (1, 'V-00000000', 'Administrador', 'General', 1);
 
 INSERT INTO `user` (`id`, `profile_id`, `email`, `password`, `role`, `status`, `force_password_change`) 
 VALUES (1, 1, 'admin@unefa.edu.ve', '$2y$10$Wx2SlX4nRQeL1ZK4GKYhrOTR.gy3zUlBOmiN9i94oZTORcu0Hvb4m', 'Admin', 'Active', 0);
+
+-- Profesor de prueba (pass: teacher123)
+INSERT INTO `profile` (`id`, `id_number`, `first_name`, `last_name`, `career_id`) 
+VALUES (2, 'V-11111111', 'Profesor', 'De Prueba', 1);
+
+INSERT INTO `user` (`id`, `profile_id`, `email`, `password`, `role`, `status`, `force_password_change`) 
+VALUES (2, 2, 'teacher@unefa.edu.ve', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Teacher', 'Active', 0);
 
 COMMIT;

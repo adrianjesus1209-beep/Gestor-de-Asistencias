@@ -9,8 +9,13 @@ require_once __DIR__ . '/../app/models/User.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
 
 // Archivo principal de ruteo
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+if (strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false || $_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['api'])) {
+    ini_set('display_errors', 0);
+    error_reporting(0);
+} else {
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
+}
 
 // PREVENIR CACHE DEL NAVEGADOR
 // Esto fuerza a que si el usuario da al botón "Atrás", se recargue el estado desde el servidor
@@ -24,14 +29,26 @@ if (!function_exists('detectBaseUrl')) {
     function detectBaseUrl() {
         $scriptName = $_SERVER['SCRIPT_NAME'];
         $baseDir = dirname($scriptName);
-        $baseDir = str_replace(DIRECTORY_SEPARATOR, '/', $baseDir);
-        return rtrim($baseDir, '/');
+        $baseDir = str_replace('\\', '/', $baseDir);
+        
+        // Si estamos en la raíz (htdocs), BASE_URL debe incluir /public para los assets
+        // a menos que el usuario los haya movido a la raíz.
+        $baseResult = rtrim($baseDir, '/');
+        
+        // Si entramos por el wrapper de la raíz, necesitamos que BASE_URL apunte a public
+        // para que las rutas de assets (CSS, imágenes) no se rompan.
+        if (defined('APP_INDEX_ROOT_WRAPPER')) {
+            return $baseResult . '/public';
+        }
+        
+        return $baseResult;
     }
 }
 define('BASE_URL', detectBaseUrl());
 
 // Manejar POST de Login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['password']) && !isset($_GET['api'])) {
+    header('Content-Type: application/json');
     $db = Database::getInstance()->getConnection();
     $authController = new AuthController($db);
     $authController->login();
@@ -40,6 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['pass
 
 // Manejar API de Registro
 if (($_GET['api'] ?? '') === 'register') {
+    header('Content-Type: application/json');
     $db = Database::getInstance()->getConnection();
     $authController = new AuthController($db);
     $authController->register();
@@ -55,7 +73,8 @@ if (isset($_GET['logout'])) {
 }
 
 // Cargar datos de héroes
-$heroes = require_once __DIR__ . '/../app/models/heroes.php';
+$heroes_file = __DIR__ . '/../app/models/heroes.php';
+$heroes = file_exists($heroes_file) ? require_once $heroes_file : [];
 
 // Obtener parámetros de ruta
 $route = $_GET['route'] ?? null;

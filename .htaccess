@@ -1,7 +1,10 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
-
-    # Redirigir todo el tráfico a la carpeta public
-    RewriteRule ^$ public/index.php [L]
-    RewriteRule ^((?!public/).*)$ public/index.php?url=$1 [L,QSA]
+    
+    # Si el archivo o carpeta existe, usarlo directamente
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    
+    # Si no existe, mandarlo al wrapper inteligente
+    RewriteRule ^(.*)$ index.php [L,QSA]
 </IfModule>

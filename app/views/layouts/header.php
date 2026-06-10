@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UNEFA - Excelencia Educativa Abierta al Pueblo</title>
-    <link href="<?= BASE_URL ?>/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/css/estilos.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/css/login.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/css/registro.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/css/dashboard.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/css/lista-estudiantes.css" rel="stylesheet">
-    <link href="<?= BASE_URL ?>/assets/icons/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 </head>
 <body>
 
