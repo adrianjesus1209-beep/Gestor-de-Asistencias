@@ -1,0 +1,30 @@
+# Configuración de Git para el Proyecto UNEFA-QR
+
+# Directorios de entorno y temporales
+.gemini/
+.DS_Store
+Thumbs.db
+node_modules/
+vendor/
+
+# Archivos de configuración local
+.env
+.env.backup
+config/database_local.php
+
+# XAMPP / Apache / PHP specific
+/nbproject/
+/logs/
+/tmp/
+error_log
+php_errors.log
+
+# Uploads y Datos dinámicos (Se recomienda ignorar en repo para evitar leaks)
+uploads/
+public/assets/qrcode/
+
+# Ignorar binarios pesados o innecesarios
+*.log
+*.tmp
+*.bak
+*.swp

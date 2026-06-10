@@ -1,0 +1,129 @@
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+    padding: 2rem;
+    font-family: system-ui, -apple-system, sans-serif;
+    gap: 1.5rem;
+}
+
+
+.welcome-card {
+    background-color: #e2ebf4; 
+    width: 100%;
+    max-width: 650px;
+    padding: 3rem;
+    border-radius: 1.5rem; 
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08); 
+    text-align: center;
+}
+
+.welcome-title {
+    color: #00429c; 
+    font-weight: bold;
+    font-size: 1.85rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.welcome-text {
+    color: #00429c;
+    opacity: 0.8;
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+
+.btn-menu-trigger {
+    background-color: #00429c; 
+    color: #ffffff;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 66, 156, 0.2);
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-menu-trigger:hover {
+    background-color: #003175;
+}
+
+.btn-menu-trigger:active {
+    transform: scale(0.98);
+}
+
+
+.custom-sidebar {
+    background-color: #ffffff;
+    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.sidebar-logo {
+    width: 45px;
+    height: auto;
+}
+
+
+.sidebar-brand-title {
+    font-size: 1.35rem; 
+    line-height: 1.2;
+    margin: 0;
+    color: #333333;
+}
+
+
+.brand-highlight {
+    color: #00429c;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+
+.btn-close-custom {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: #999;
+    cursor: pointer;
+    margin-left: auto;
+}
+
+
+.sidebar-body {
+    padding: 1.5rem 0;
+}
+
+.sidebar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-link {
+    display: block;
+    color: #00429c;
+    font-size: 1.2rem;
+    font-weight: 500;
+    padding: 1rem 2rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+.sidebar-link:hover {
+    background-color: #f0f4f8;
+    color: #003175;
+    padding-left: 2.5rem;
+}
