@@ -45,7 +45,7 @@ Este sistema automatiza el control de asistencia estudiantil de la UNEFA utiliza
 
 Para garantizar la seguridad y el orden del sistema, se han definido las siguientes reglas oficiales:
 
-1. El QR no contiene información personal, solo un código secreto (Hash).
+1. El código QR contiene información esencial (Cédula, Correo y Nombre completo) vinculada a un código secreto único (Hash).
 2. El estudiante no puede generar su propio QR, el sistema lo genera automáticamente al registrarse.
 3. Cada estudiante tiene un solo QR, es único e intransferible.
 4. Si un estudiante pierde su QR, no puede obtener uno nuevo automáticamente; debe solicitar la regeneración al administrador.
