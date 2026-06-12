@@ -129,6 +129,24 @@ CREATE TABLE `credencial_qr` (
 
 
 -- ============================================
+-- AUDITORÍA
+-- ============================================
+
+CREATE TABLE `registro_auditoria` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_usuario` int(11) DEFAULT NULL,
+  `accion` varchar(100) NOT NULL,
+  `nombre_tabla` varchar(50) DEFAULT NULL,
+  `id_registro` int(11) DEFAULT NULL,
+  `valores_anteriores` json DEFAULT NULL,
+  `valores_nuevos` json DEFAULT NULL,
+  `direccion_ip` varchar(45) DEFAULT NULL,
+  `creado_el` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`id_usuario`) REFERENCES `usuario`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
 -- PLANIFICACIÓN Y SECCIONES
 -- ============================================
 
@@ -210,6 +228,7 @@ START TRANSACTION;
 
 -- Roles
 INSERT INTO `roles` (`id`, `nombre_rol`, `descripcion`) VALUES
+(1, 'Admin', 'Administración y Gestión de Profesores'),
 (2, 'Profesor', 'Docente'),
 (3, 'Estudiante', 'Alumno');
 
@@ -221,5 +240,13 @@ INSERT INTO `preguntas_seguridad` (`texto_pregunta`) VALUES
 ('¿Cuál es tu comida favorita?'),
 ('¿Cual es el primer nombre de tu abuelo?'),
 ('¿Cuál es el segundo nombre de tu padre?');
+
+-- Perfil Admin
+INSERT INTO `perfil` (`id`, `cedula`, `primer_nombre`, `primer_apellido`) 
+VALUES (1, 'V-00000000', 'Administrador', 'Sistema');
+
+-- Usuario Admin (clave: 123456)
+INSERT INTO `usuario` (`id`, `id_perfil`, `id_rol`, `correo`, `clave`, `estado`, `cambio_clave_obligatorio`) 
+VALUES (1, 1, 1, 'admin@unefa.edu.ve', '$2y$10$Wx2SlX4nRQeL1ZK4GKYhrOTR.gy3zUlBOmiN9i94oZTORcu0Hvb4m', 'Activo', 0);
 
 COMMIT;

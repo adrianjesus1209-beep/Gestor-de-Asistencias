@@ -145,6 +145,24 @@ CREATE TABLE `qr_credential` (
 
 
 -- ============================================
+-- AUDITORÍA: LOGS DE SISTEMA
+-- ============================================
+
+CREATE TABLE `system_audit_log` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) DEFAULT NULL,
+  `action` varchar(100) NOT NULL,
+  `table_name` varchar(50) DEFAULT NULL,
+  `record_id` int(11) DEFAULT NULL,
+  `old_values` json DEFAULT NULL,
+  `new_values` json DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`user_id`) REFERENCES `user`(`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ============================================
 -- MÓDULO C: MALLA CURRICULAR Y SECCIONES
 -- ============================================
 
@@ -237,6 +255,7 @@ START TRANSACTION;
 
 -- Roles
 INSERT INTO `roles` (`id`, `role_name`, `description`) VALUES
+(1, 'Admin', 'Administration and Teacher Management'),
 (2, 'Teacher', 'Profesor'),
 (3, 'Student', 'Estudiante');
 
@@ -248,5 +267,13 @@ INSERT INTO `security_questions` (`question_text`) VALUES
 ('¿Cuál es tu comida favorita?'),
 ('¿Cual es el primer nombre de tu abuelo?'),
 ('¿Cuál es tu comida favorita?');
+
+-- Perfil Admin
+INSERT INTO `profile` (`id`, `id_number`, `first_name`, `last_name`) 
+VALUES (1, 'V-00000000', 'Admin', 'Sistema');
+
+-- Usuario Admin (pass: 123456, hash bcrypt)
+INSERT INTO `user` (`id`, `profile_id`, `role_id`, `email`, `password`, `status`, `force_password_change`) 
+VALUES (1, 1, 1, 'admin@unefa.edu.ve', '$2y$10$Wx2SlX4nRQeL1ZK4GKYhrOTR.gy3zUlBOmiN9i94oZTORcu0Hvb4m', 'Active', 0);
 
 COMMIT;
