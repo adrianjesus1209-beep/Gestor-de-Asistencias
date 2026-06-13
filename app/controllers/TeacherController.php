@@ -76,8 +76,8 @@ class TeacherController {
      * Endpoints 3 y 4: Cambiar estado de inscripción (Aceptar/Rechazar)
      * PUT /api/teacher/enrollment/update-status
      */
-    public function updateEnrollmentStatus() {
-        $input = json_decode(file_get_contents("php://input"), true);
+    public function updateEnrollmentStatus(array $input = null) {
+        $input = $input ?? json_decode(file_get_contents("php://input"), true);
         
         $enrollment_id = isset($input['enrollment_id']) ? intval($input['enrollment_id']) : null;
         $status = isset($input['status']) ? $input['status'] : null; // 'Active' o 'Withdrawn' (Según el ENUM de SQL)
@@ -102,8 +102,8 @@ class TeacherController {
      * Endpoint para INICIAR/ABRIR una clase
      * POST /api/teacher/session/start
      */
-    public function startClassSession() {
-        $input = json_decode(file_get_contents("php://input"), true);
+    public function startClassSession(array $input = null) {
+        $input = $input ?? json_decode(file_get_contents("php://input"), true);
         $section_id = isset($input['section_id']) ? intval($input['section_id']) : null;
 
         if (!$section_id) {
@@ -130,8 +130,8 @@ class TeacherController {
      * Endpoint 5: Procesar el escaneo del código QR
      * POST /api/teacher/attendance/scan-qr
      */
-    public function scanQrCode() {
-        $input = json_decode(file_get_contents("php://input"), true);
+    public function scanQrCode(array $input = null) {
+        $input = $input ?? json_decode(file_get_contents("php://input"), true);
         
         $qr_token = isset($input['qr_token']) ? $input['qr_token'] : null;
         $section_id = isset($input['section_id']) ? intval($input['section_id']) : null;
@@ -154,8 +154,8 @@ class TeacherController {
      * Endpoint 6: Cerrar clase y registrar ausentes en lote
      * POST /api/teacher/session/close
      */
-    public function closeClassSession() {
-        $input = json_decode(file_get_contents("php://input"), true);
+    public function closeClassSession(array $input = null) {
+        $input = $input ?? json_decode(file_get_contents("php://input"), true);
         
         $session_id = isset($input['session_id']) ? intval($input['session_id']) : null;
         $section_id = isset($input['section_id']) ? intval($input['section_id']) : null;
@@ -173,8 +173,8 @@ class TeacherController {
         }
     }
 
-    public function toggleAttendanceManual() {
-        $input = json_decode(file_get_contents("php://input"), true);
+    public function toggleAttendanceManual(array $input = null) {
+        $input = $input ?? json_decode(file_get_contents("php://input"), true);
         $student_id = intval($input['student_id'] ?? 0);
         $section_id = intval($input['section_id'] ?? 0);
         $action = $input['action'] ?? '';

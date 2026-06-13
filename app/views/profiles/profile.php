@@ -6,9 +6,12 @@
     $userId = $authPayload['user_id'] ?? 0;
     $userData = $userModel->getProfileData($userId);
 
+    $rawRole = strtolower((string) ($userData['role'] ?? 'student'));
+    $isTeacher = in_array($rawRole, ['teacher', 'profesor'], true);
+
     // Mapear datos para la vista
     $user = [
-        'role' => strtolower($userData['role'] ?? 'estudiante'),
+        'role' => $isTeacher ? 'teacher' : 'student',
         'first_name' => $userData['first_name'] ?? '',
         'second_name' => $userData['middle_name'] ?? '',
         'first_lastname' => $userData['last_name'] ?? '',
@@ -32,13 +35,13 @@
                     style="width: 180px; height: 180px; object-fit: cover;">
                 <h4 class="mt-3"><?= $user['first_name'] . ' ' . $user['second_name'] . ' ' . $user['first_lastname'] . ' ' . $user['second_lastname'] ?></h4>
 
-                <?php if ($user['role'] === 'profesor'): ?>
+                <?php if ($isTeacher): ?>
                     <p class="text-muted">Profesor</p>
                 <?php else: ?>
                     <p class="text-muted">Estudiante de <?= $user['career'] ?></p>
                 <?php endif; ?>
 
-                <?php if ($user['role'] === 'profesor'): ?>
+                <?php if ($isTeacher): ?>
                     <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#qrModal">
                         <i class="bi bi-qr-code-scan me-2"></i>Escanear QR
                     </button>
@@ -48,7 +51,7 @@
                     <i class="bi bi-pencil-square me-2"></i>Editar Perfil
                 </a>
 
-                <?php if ($user['role'] === 'profesor'): ?>
+                <?php if ($isTeacher): ?>
                     <a href="index.php?dashboard_profesor" class="btn btn-outline-secondary mt-2">
                         <i class="bi bi-arrow-return-left me-2"></i>Volver
                     </a>
@@ -92,7 +95,7 @@
 </div>
 
 <!-- Modal para escanear QR (solo profesores) -->
-<?php if ($user['role'] === 'profesor'): ?>
+<?php if ($isTeacher): ?>
     <div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">

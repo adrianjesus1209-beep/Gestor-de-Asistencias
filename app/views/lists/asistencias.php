@@ -33,7 +33,8 @@ if ($selected_section_id > 0) {
 $queryAvailable = "SELECT u.id as student_id, p.first_name, p.last_name, p.id_number
                    FROM user u
                    JOIN profile p ON u.profile_id = p.id
-                   WHERE u.role = 'Student'
+                   JOIN roles r ON u.role_id = r.id
+                   WHERE r.role_name = 'Student'
                    AND u.id NOT IN (
                        SELECT student_id FROM enrollment WHERE section_id = :section_id
                    )

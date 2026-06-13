@@ -33,7 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const result = await response.json();
 
-            if (result.status === 'success') {
+            const isSuccess = result.success === true || result.status === 'success';
+
+            if (isSuccess) {
                 await Swal.fire({
                     icon: 'success',
                     title: 'Inicio de sesión correcto',
@@ -57,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             await Swal.fire({
                 icon: 'error',
                 title: 'No se pudo iniciar sesión',
-                text: result.message || 'Verifica tus credenciales e inténtalo nuevamente.',
+                text: result.error || result.message || 'Verifica tus credenciales e inténtalo nuevamente.',
                 confirmButtonColor: '#dc3545'
             });
         } catch (error) {

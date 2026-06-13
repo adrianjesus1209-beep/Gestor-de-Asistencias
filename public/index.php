@@ -7,6 +7,8 @@ use Config\Database;
 require_once __DIR__ . '/../app/config/Database.php';
 require_once __DIR__ . '/../app/models/User.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/helpers/JWTHelper.php';
+require_once __DIR__ . '/../app/Utils/Security.php';
 
 // Archivo principal de ruteo
 if (strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false || $_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['api'])) {
@@ -45,6 +47,28 @@ if (!function_exists('detectBaseUrl')) {
     }
 }
 define('BASE_URL', detectBaseUrl());
+
+$db = null;
+$authPayload = null;
+$sessionToken = $_COOKIE['session_token'] ?? null;
+$jwtToken = $_COOKIE['jwt'] ?? null;
+
+if ($sessionToken || $jwtToken) {
+    $db = Database::getInstance()->getConnection();
+
+    if ($sessionToken) {
+        $sessionData = \App\Utils\Security::validateSession($db, $sessionToken);
+        if ($sessionData) {
+            $authPayload = [
+                'user_id' => (int) $sessionData['user_id'],
+                'email' => $sessionData['email'] ?? null,
+                'role' => $sessionData['role'] ?? $sessionData['role_name'] ?? null,
+            ];
+        }
+    } elseif ($jwtToken) {
+        $authPayload = JWTHelper::validateToken($jwtToken);
+    }
+}
 
 // Manejar POST de Login
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['password']) && !isset($_GET['api'])) {
@@ -86,14 +110,6 @@ $showDashboardAdmin = isset($_GET['dashboard_admin']);
 $showList = isset($_GET['list']);
 $showQR = isset($_GET['qr']);
 $heroeId = $_GET['id'] ?? null;
-
-// Almacenar datos de autenticación globales
-$authPayload = null;
-require_once __DIR__ . '/../app/helpers/JWTHelper.php';
-$token = $_COOKIE['jwt'] ?? null;
-if ($token) {
-    $authPayload = JWTHelper::validateToken($token);
-}
 
 // Seguridad: Validar JWT para Dashboards y secciones privadas
 if ($showDashboardAdmin || $showDashboardEstudiante || $showDashboardProfesor || $showList || $showQR || $route === 'profile' || $route === 'edit-profile') {
@@ -190,7 +206,15 @@ if ($showLogin) {
     require_once __DIR__ . '/../app/services/AttendanceService.php';
     require_once __DIR__ . '/../app/controllers/TeacherController.php';
 
+    if (!$authPayload || !in_array($authPayload['role'] ?? '', ['Admin', 'Teacher'], true)) {
+        header('Content-Type: application/json');
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Acceso denegado.']);
+        exit;
+    }
+
     $db = Database::getInstance()->getConnection();
+    $sectionModel = new Section($db);
     $attendanceModel = new Attendance($db);
     $enrollmentModel = new Enrollment($db);
     $classSessionModel = new ClassSession($db);
@@ -203,15 +227,49 @@ if ($showLogin) {
     );
 
     if ($_GET['api'] === 'update_enrollment') {
-        $teacherController->updateEnrollmentStatus();
+        $input = json_decode(file_get_contents("php://input"), true);
+        $enrollment_id = intval($input['enrollment_id'] ?? 0);
+        if ($enrollment_id > 0 && ($authPayload['role'] ?? '') === 'Teacher') {
+            $stmtOwnership = $db->prepare("SELECT e.section_id
+            FROM enrollment e
+            WHERE e.id = :enrollment_id
+            LIMIT 1");
+            $stmtOwnership->execute([':enrollment_id' => $enrollment_id]);
+            $rowOwnership = $stmtOwnership->fetch(PDO::FETCH_ASSOC);
+            $sectionId = intval($rowOwnership['section_id'] ?? 0);
+            if (!$sectionId || !$sectionModel->verifyTeacherOwnership($sectionId, (int) $authPayload['user_id'])) {
+                echo json_encode(['success' => false, 'message' => 'Acceso denegado.']);
+                exit;
+            }
+        }
+        $teacherController->updateEnrollmentStatus($input);
     } elseif ($_GET['api'] === 'scan_qr') {
-        $teacherController->scanQrCode();
+        $input = json_decode(file_get_contents("php://input"), true);
+        $sectionId = intval($input['section_id'] ?? 0);
+        if (($authPayload['role'] ?? '') === 'Teacher' && !$sectionModel->verifyTeacherOwnership($sectionId, (int) $authPayload['user_id'])) {
+            header('Content-Type: application/json');
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Acceso denegado.']);
+            exit;
+        }
+        $teacherController->scanQrCode($input);
     } elseif ($_GET['api'] === 'toggle_attendance') {
-        $teacherController->toggleAttendanceManual();
+        $input = json_decode(file_get_contents("php://input"), true);
+        $sectionId = intval($input['section_id'] ?? 0);
+        if (($authPayload['role'] ?? '') === 'Teacher' && !$sectionModel->verifyTeacherOwnership($sectionId, (int) $authPayload['user_id'])) {
+            header('Content-Type: application/json');
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Acceso denegado.']);
+            exit;
+        }
+        $teacherController->toggleAttendanceManual($input);
     } elseif ($_GET['api'] === 'enroll_student') {
         $input = json_decode(file_get_contents("php://input"), true);
         $student_id  = intval($input['student_id'] ?? 0);
         $section_id  = intval($input['section_id'] ?? 0);
+        if (($authPayload['role'] ?? '') === 'Teacher' && !$sectionModel->verifyTeacherOwnership($section_id, (int) $authPayload['user_id'])) {
+            echo json_encode(['success' => false, 'message' => 'Acceso denegado.']); exit;
+        }
         if (!$student_id || !$section_id) {
             echo json_encode(['success' => false, 'message' => 'Datos incompletos.']); exit;
         }
@@ -230,6 +288,10 @@ if ($showLogin) {
         $student_id = intval($input['student_id'] ?? 0);
         $section_id = intval($input['section_id'] ?? 0);
         $decision   = $input['decision'] ?? '';
+
+        if (($authPayload['role'] ?? '') === 'Teacher' && !$sectionModel->verifyTeacherOwnership($section_id, (int) $authPayload['user_id'])) {
+            echo json_encode(['success' => false, 'message' => 'Acceso denegado.']); exit;
+        }
 
         if (!$request_id || !in_array($decision, ['Accepted', 'Rejected'])) {
             echo json_encode(['success' => false, 'message' => 'Datos inválidos.']); exit;

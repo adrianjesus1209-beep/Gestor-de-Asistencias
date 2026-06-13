@@ -313,7 +313,12 @@ document.addEventListener('DOMContentLoaded', function () {
             $sections = $sModel->getByTeacherId($authPayload['user_id'] ?? 0);
             $firstSectionId = !empty($sections) ? $sections[0]['id'] : 0;
         ?>
-        const sectionId = <?= $firstSectionId ?>;
+        const sectionId = <?= intval($firstSectionId) ?>;
+
+        if (!sectionId) {
+            Swal.fire('Sin secciones activas', 'No tienes secciones activas asignadas para registrar asistencia.', 'warning');
+            return;
+        }
 
         fetch('index.php?api=scan_qr', {
             method: 'POST',

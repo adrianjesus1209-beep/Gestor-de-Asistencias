@@ -6,7 +6,8 @@ $userModel = new App\Models\User($db);
 $userId = $authPayload['user_id'] ?? 0;
 $userData = $userModel->getProfileData($userId);
 
-$estudianteActivo = ($userData) ? true : false;
+$estadoUsuario = strtolower((string) ($userData['status'] ?? ''));
+$estudianteActivo = in_array($estadoUsuario, ['active', 'activo'], true);
 $tieneQRAgregado = (!empty($userData['qr_token'])) ? true : false;
 $codigoSecretoQR = $userData['qr_token'] ?? "";
 ?>

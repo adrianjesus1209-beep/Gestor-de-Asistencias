@@ -16,6 +16,14 @@ class AttendanceService {
      * Lógica centralizada para procesar el escaneo del código QR (Endpoint 5)
      */
     public function processQrScan($qr_token, $section_id) {
+        if (!$section_id) {
+            return [
+                'success' => false,
+                'error_code' => 'INVALID_SECTION',
+                'message' => 'La sección seleccionada no es válida.'
+            ];
+        }
+
         // 1. Traducir el token QR al ID del estudiante (Tabla qr_credential)
         $student_id = $this->attendanceModel->getStudentIdByToken($qr_token);
         if (!$student_id) {

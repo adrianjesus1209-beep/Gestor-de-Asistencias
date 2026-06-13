@@ -11,10 +11,11 @@ $sectionModel = new Section($db);
 $teacher_id = $authPayload['user_id'] ?? 0;
 $sections = $sectionModel->getByTeacherId($teacher_id);
 $selected_section_name = "Sin sección seleccionada";
+$section_id = 0;
 $students = [];
 
 if (!empty($sections)) {
-    $section_id = $_GET['section_id'] ?? $sections[0]['id'];
+    $section_id = intval($_GET['section_id'] ?? $sections[0]['id']);
     $students = $enrollmentModel->getStudentsBySection($section_id);
     foreach($sections as $s) {
         if($s['id'] == $section_id) $selected_section_name = $s['subject_name'] . " - " . $s['section_name'];

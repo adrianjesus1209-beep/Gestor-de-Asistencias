@@ -3,7 +3,7 @@
 $db = \Config\Database::getInstance()->getConnection();
 require_once __DIR__ . '/../../models/User.php';
 $userModel = new \App\Models\User($db);
-$profile = $userModel->getProfileData($authPayload['user_id']);
+$profile = $userModel->getProfileData($authPayload['user_id'] ?? 0);
 
 if (!$profile) {
     header('Location: index.php?dashboard_estudiante');
@@ -13,6 +13,8 @@ if (!$profile) {
 $profilePic = $profile['profile_picture'] ?? 'default-profile.webp';
 $picUrl = BASE_URL . '/assets/img/profiles/' . $profilePic;
 $updated = isset($_GET['updated']);
+$rawRole = strtolower((string) ($profile['role'] ?? 'student'));
+$dashboardLink = in_array($rawRole, ['teacher', 'profesor'], true) ? 'index.php?dashboard_profesor' : 'index.php?dashboard_estudiante';
 ?>
 
 <div class="container py-5">
@@ -86,7 +88,7 @@ $updated = isset($_GET['updated']);
                         </div>
 
                         <div class="mt-4 d-flex justify-content-between">
-                            <a href="index.php?route=profile" class="btn btn-outline-secondary rounded-pill px-4">
+                            <a href="<?= htmlspecialchars($dashboardLink) ?>" class="btn btn-outline-secondary rounded-pill px-4">
                                 <i class="bi bi-arrow-left me-1"></i> Cancelar
                             </a>
                             <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">

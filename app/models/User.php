@@ -13,19 +13,38 @@ class User {
         $this->db = $db;
     }
 
+    public function findByEmail($email) {
+        $query = "SELECT u.*, r.role_name AS role
+                  FROM " . $this->table . " u
+                  INNER JOIN roles r ON u.role_id = r.id
+                  WHERE u.email = :email
+                  LIMIT 1";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([':email' => $email]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function findById($id) {
+        $query = "SELECT u.*, r.role_name AS role
+                  FROM " . $this->table . " u
+                  INNER JOIN roles r ON u.role_id = r.id
+                  WHERE u.id = :id
+                  LIMIT 1";
+
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([':id' => $id]);
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
     /**
      * Método para leer un usuario por correo electrónico y contraseña
      * Realiza una consulta a la base de datos para encontrar un usuario con el correo electrónico
      */
     public function read($email, $password) {
-
-        $query = "SELECT * FROM " . $this->table . " WHERE email = :email LIMIT 1";
-
-        $stmt = $this->db->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->execute();
-
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $this->findByEmail($email);
 
         if (!$user) {
             return false;
@@ -54,11 +73,12 @@ class User {
             ];
         }
 
-        $query = "SELECT u.email, u.role, p.*, c.career_name, q.qr_token 
+        $query = "SELECT u.email, u.status, r.role_name AS role, p.*, c.career_name, q.qr_token 
                   FROM " . $this->table . " u
                   INNER JOIN profile p ON u.profile_id = p.id
                   LEFT JOIN career c ON p.career_id = c.id
                   LEFT JOIN qr_credential q ON u.id = q.user_id
+              LEFT JOIN roles r ON u.role_id = r.id
                   WHERE u.id = :id LIMIT 1";
 
         $stmt = $this->db->prepare($query);
@@ -74,6 +94,12 @@ class User {
     public function create($data) {
         try {
             $this->db->beginTransaction();
+
+            $roleId = $this->getRoleIdByName('Student');
+
+            if (!$roleId) {
+                throw new Exception('No se encontró el rol Student en la base de datos.');
+            }
 
             // 1. Insertar en tabla PROFILE (campos exactos de la BD real)
             $queryProfile = "INSERT INTO profile (first_name, middle_name, last_name, second_last_name, id_number, career_id) 
@@ -91,19 +117,19 @@ class User {
 
             // 2. Insertar en tabla USER
             $hashedPassword = password_hash($data['password'], PASSWORD_DEFAULT);
-            $queryUser = "INSERT INTO user (email, password, role, profile_id) 
-                          VALUES (:email, :password, 'Student', :profile_id)";
+            $queryUser = "INSERT INTO user (email, password, role_id, profile_id) 
+                          VALUES (:email, :password, :role_id, :profile_id)";
             $stmtUser = $this->db->prepare($queryUser);
             $stmtUser->execute([
                 ':email'      => $data['email'],
                 ':password'   => $hashedPassword,
+                ':role_id'    => $roleId,
                 ':profile_id' => $profileId
             ]);
             $userId = $this->db->lastInsertId();
 
             // 3. Generar QR token único
-            $prefix = strtoupper(substr($data['first_name'], 0, 1) . substr($data['last_name'], 0, 1));
-            $qrToken = "UNEFA-" . $prefix . "-" . $data['id_number'] . "-" . substr(uniqid(), -4);
+            $qrToken = bin2hex(random_bytes(32));
             $queryQR = "INSERT INTO qr_credential (user_id, qr_token) VALUES (:user_id, :qr_token)";
             $stmtQR = $this->db->prepare($queryQR);
             $stmtQR->execute([':user_id' => $userId, ':qr_token' => $qrToken]);
@@ -115,6 +141,15 @@ class User {
             error_log("Error en User::create() -> " . $e->getMessage());
             return false;
         }
+    }
+
+    private function getRoleIdByName($roleName) {
+        $query = "SELECT id FROM roles WHERE role_name = :role_name LIMIT 1";
+        $stmt = $this->db->prepare($query);
+        $stmt->execute([':role_name' => $roleName]);
+        $role = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $role['id'] ?? null;
     }
 }
 
