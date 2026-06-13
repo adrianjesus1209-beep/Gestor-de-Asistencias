@@ -81,6 +81,9 @@ class AuthController {
             exit();
         }
 
+        $matchedUser = $userModel->findByEmail($email);
+        $matchedUserId = $matchedUser['id'] ?? null;
+
         echo json_encode([
             'status' => 'error',
             'message' => 'Credenciales incorrectas.'
@@ -161,6 +164,114 @@ class AuthController {
         } else {
             echo json_encode(['status' => 'error', 'message' => 'Ocurrió un error al procesar el registro.']);
         }
+        exit();
+    }
+
+    /**
+     * Maneja el envío final de restablecimiento de contraseña.
+     *
+     * Flujo:
+     * 1) Recepción de email + cédula + nuevas contraseñas + respuestas de seguridad.
+     * 2) Validación de datos obligatorios y formato de email.
+     * 3) Verificación de usuario por email + cédula.
+     * 4) Validación de respuestas a preguntas de seguridad.
+     * 5) Actualización de la contraseña si todo es correcto.
+     */
+    public function resetPassword() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            exit();
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $email = trim($input['email'] ?? '');
+        $idNumber = trim($input['id_number'] ?? '');
+        $newPassword = trim($input['new_password'] ?? '');
+        $confirmPassword = trim($input['confirm_password'] ?? '');
+
+        if (empty($email) || empty($idNumber) || empty($newPassword) || empty($confirmPassword)) {
+            echo json_encode(['status' => 'error', 'message' => 'Por favor, complete todos los campos.']);
+            exit();
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo json_encode(['status' => 'error', 'message' => 'El formato del correo electrónico es inválido.']);
+            exit();
+        }
+
+        if ($newPassword !== $confirmPassword) {
+            echo json_encode(['status' => 'error', 'message' => 'Las contraseñas no coinciden.']);
+            exit();
+        }
+
+        if (strlen($newPassword) < 8) {
+            echo json_encode(['status' => 'error', 'message' => 'La contraseña debe tener al menos 8 caracteres.']);
+            exit();
+        }
+
+        $userModel = new User($this->db);
+        $user = $userModel->findByEmailAndIdNumber($email, $idNumber);
+
+        if (!$user) {
+            echo json_encode(['status' => 'error', 'message' => 'No se encontró una cuenta con ese correo electrónico y cédula.']);
+            exit();
+        }
+
+        // Las respuestas a las preguntas de seguridad se reciben como un array:
+        // [{ question_id: 1, answer: '...' }, { question_id: 2, answer: '...' }]
+        $securityAnswers = $input['security_answers'] ?? [];
+        if (!$userModel->verifySecurityAnswers((int)$user['id'], $securityAnswers)) {
+            echo json_encode(['status' => 'error', 'message' => 'Las respuestas a las preguntas de seguridad son incorrectas.']);
+            exit();
+        }
+
+        // Si llegó aquí, la validación de seguridad fue correcta y podemos actualizar la contraseña.
+        $success = $userModel->updatePassword((int)$user['id'], $newPassword);
+
+        if ($success) {
+            echo json_encode(['status' => 'success', 'message' => 'La contraseña se actualizó correctamente. Ahora puede iniciar sesión.']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'No se pudo actualizar la contraseña. Intente nuevamente.']);
+        }
+        exit();
+    }
+
+    /**
+     * Devuelve dos preguntas de seguridad para el usuario identificado por email y cédula.
+     * Este paso se ejecuta antes de permitir el cambio de contraseña.
+     */
+    public function getSecurityQuestions() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            exit();
+        }
+
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $email = trim($input['email'] ?? '');
+        $idNumber = trim($input['id_number'] ?? '');
+
+        if (empty($email) || empty($idNumber)) {
+            // Validación básica: el usuario debe informar tanto correo como cédula
+            echo json_encode(['status' => 'error', 'message' => 'Por favor, complete correo y cédula.']);
+            exit();
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            // Validar formato de correo antes de consultar la base de datos
+            echo json_encode(['status' => 'error', 'message' => 'El formato del correo electrónico es inválido.']);
+            exit();
+        }
+
+        $userModel = new User($this->db);
+        // Buscar las preguntas de seguridad para el usuario validado.
+        // Si no hay preguntas guardadas en la base de datos, el modelo puede devolver preguntas demo
+        // para permitir la prueba del flujo en entornos de desarrollo local.
+        $questionData = $userModel->getSecurityQuestionsForUser($email, $idNumber, 2);
+
+        if (!$questionData) {
+            echo json_encode(['status' => 'error', 'message' => 'No se encontraron preguntas de seguridad para esa cuenta.']);
+            exit();
+        }
+
+        echo json_encode(['status' => 'success', 'questions' => $questionData['questions']]);
         exit();
     }
 }

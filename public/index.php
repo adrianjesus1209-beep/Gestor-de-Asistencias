@@ -46,6 +46,22 @@ if (($_GET['api'] ?? '') === 'register') {
     exit;
 }
 
+// Manejar API de Reset de Contraseña
+if (($_GET['api'] ?? '') === 'reset_password') {
+    $db = Database::getInstance()->getConnection();
+    $authController = new AuthController($db);
+    $authController->resetPassword();
+    exit;
+}
+
+// Manejar API de preguntas de seguridad
+if (($_GET['api'] ?? '') === 'security_questions') {
+    $db = Database::getInstance()->getConnection();
+    $authController = new AuthController($db);
+    $authController->getSecurityQuestions();
+    exit;
+}
+
 // Manejar Logout
 if (isset($_GET['logout'])) {
     $db = Database::getInstance()->getConnection();
@@ -94,6 +110,8 @@ if ($showLogin) {
     require_once __DIR__ . '/../app/views/auth/login.php';
 } elseif ($showRegister) {
     require_once __DIR__ . '/../app/views/auth/register.php';
+} elseif (isset($_GET['reset_password'])) {
+    require_once __DIR__ . '/../app/views/auth/reset-password.php';
 } elseif ($showDashboardEstudiante) {
     require_once __DIR__ . '/../app/views/dashboard/estudiante.php';
 } elseif ($showDashboardProfesor) {

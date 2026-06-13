@@ -55,6 +55,9 @@
                 ¿No posee una cuenta? 
                 <a href="index.php?register" class="login-link">Registrarse</a>
             </p>
+            <p class="login-footer-text">
+                <a href="index.php?reset_password" class="login-link">¿Olvidó su contraseña?</a>
+            </p>
         </div>
         
         <div class="login-footer mt-extra">
