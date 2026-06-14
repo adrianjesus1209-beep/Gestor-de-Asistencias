@@ -274,6 +274,26 @@ VALUES (1, 'V-00000000', 'Admin', 'Sistema');
 
 -- Usuario Admin (pass: 123456, hash bcrypt)
 INSERT INTO `user` (`id`, `profile_id`, `role_id`, `email`, `password`, `status`, `force_password_change`) 
-VALUES (1, 1, 1, 'admin@unefa.edu.ve', '$2y$10$Wx2SlX4nRQeL1ZK4GKYhrOTR.gy3zUlBOmiN9i94oZTORcu0Hvb4m', 'Active', 0);
+VALUES (1, 1, 1, 'admin@unefa.edu.ve', '$2y$10$ZcjWQJVydVKuij7TqNTxsOi/g0BiqUVKGuV/Po9P1UQKAY8WOE1Xa', 'Active', 0);
+
+-- Carreras base para el registro de estudiantes
+INSERT INTO `career` (`id`, `career_code`, `career_name`) VALUES
+(1, 'ING-SIST', 'Ingeniería de Sistemas'),
+(2, 'TELCO', 'Telecomunicaciones'),
+(3, 'ING-MEC', 'Ingeniería Mecánica');
+
+-- Semestres base para la malla curricular
+INSERT INTO `semester` (`id`, `semester_number`, `semester_name`) VALUES
+(1, 1, 'Primer Semestre'),
+(2, 2, 'Segundo Semestre'),
+(3, 3, 'Tercer Semestre'),
+(4, 4, 'Cuarto Semestre'),
+(5, 5, 'Quinto Semestre');
+
+-- Materias base para la gestion de secciones
+INSERT INTO `subject` (`id`, `subject_code`, `subject_name`) VALUES
+(1, 'MAT-101', 'Matemática I'),
+(2, 'PRO-101', 'Programación I'),
+(3, 'BD-101', 'Bases de Datos I');
 
 COMMIT;

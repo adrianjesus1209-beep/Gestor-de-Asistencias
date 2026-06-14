@@ -63,6 +63,10 @@ class AuthController {
             $this->respond(false, 'Credenciales incorrectas.');
         }
 
+        if (($user['status'] ?? '') !== 'Active') {
+            $this->respond(false, 'Tu cuenta aún no ha sido aprobada o está inactiva.');
+        }
+
         Security::resetFailedLogins($this->db, (int) $user['id']);
 
         $sessionToken = Security::createSecureSession(

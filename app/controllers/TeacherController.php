@@ -1,6 +1,9 @@
 <?php
 // app/controllers/TeacherController.php
 
+use App\Utils\Security;
+use App\Utils\Validator;
+
 class TeacherController {
     private $db;
     private $sectionModel;
@@ -24,7 +27,7 @@ class TeacherController {
      * Cumple con la regla: "Verificar roles en CADA controlador"
      */
     private function checkTeacherAccess($userId) {
-        if (!class_exists('Security') || !Security::checkRole($userId, ['Teacher'])) {
+        if (!class_exists(Security::class) || !Security::checkRole($this->db, (int) $userId, ['Teacher'])) {
             header('Content-Type: application/json');
             http_response_code(403);
             echo json_encode(["success" => false, "message" => "Acceso denegado. Se requieren permisos de Profesor."]);
@@ -42,8 +45,8 @@ class TeacherController {
 
         $input = json_decode(file_get_contents('php://input'), true);
         
-        // Limpiar datos de entrada con el validador de Cristian
-        if (class_exists('Validator')) { $input = Validator::sanitizeInput($input); }
+        // Limpiar datos de entrada con el validador
+        if (class_exists(Validator::class) && is_array($input)) { $input = array_map([Validator::class, 'sanitizarInput'], $input); }
 
         if (empty($input['subject_id']) || empty($input['section_name']) || empty($input['day_of_week']) || empty($input['start_time']) || empty($input['end_time'])) {
             echo json_encode(["success" => false, "message" => "Faltan datos obligatorios para crear la sección."]);
@@ -76,7 +79,7 @@ class TeacherController {
 
         $input = json_decode(file_get_contents('php://input'), true);
 
-        if (class_exists('Validator')) { $input = Validator::sanitizeInput($input); }
+        if (class_exists(Validator::class) && is_array($input)) { $input = array_map([Validator::class, 'sanitizarInput'], $input); }
 
         $enrollment_id = intval($input['enrollment_id'] ?? 0);
         $status = $input['status'] ?? null;

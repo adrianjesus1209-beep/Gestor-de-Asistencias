@@ -2,11 +2,13 @@
 session_set_cookie_params(0);
 session_start();
 use App\Controllers\AuthController;
+use App\Controllers\RegisterController;
 use Config\Database;
 
 require_once __DIR__ . '/../app/config/Database.php';
 require_once __DIR__ . '/../app/models/User.php';
 require_once __DIR__ . '/../app/controllers/AuthController.php';
+require_once __DIR__ . '/../app/controllers/RegisterController.php';
 require_once __DIR__ . '/../app/helpers/JWTHelper.php';
 require_once __DIR__ . '/../app/Utils/Security.php';
 
@@ -83,8 +85,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['email'], $_POST['pass
 if (($_GET['api'] ?? '') === 'register') {
     header('Content-Type: application/json');
     $db = Database::getInstance()->getConnection();
-    $authController = new AuthController($db);
-    $authController->register();
+    $registerController = new RegisterController($db);
+    $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+    echo $registerController->registerStudent($input);
+    exit;
+}
+
+if (($_GET['api'] ?? '') === 'register_teacher') {
+    header('Content-Type: application/json');
+    $db = Database::getInstance()->getConnection();
+    $registerController = new RegisterController($db);
+    $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+    echo $registerController->registerTeacher($input);
     exit;
 }
 
