@@ -37,39 +37,14 @@
                 });
             });
         });
-
-        // ==========================================
-        // SISTEMA DE DESTRUCCIÓN ACTIVA DE SESIÓN Y CACHÉ
-        // ==========================================
-
-        // 1. Forzar recarga si se intenta entrar dándole "Atrás" desde una página en caché
-        window.addEventListener("pageshow", function(event) {
-            if (event.persisted) {
-                window.location.reload(); 
-            }
-        });
-
-        // 2. Temporizador de Auto-Cierre por inactividad
-        let inactivityTimer;
-        // 15 minutos en milisegundos (900,000)
-        const TIMEOUT_LIMIT = 900000; 
-        
-        function resetTimer() {
-            clearTimeout(inactivityTimer);
-            inactivityTimer = setTimeout(() => {
-                // Para evitar loop en login, comprobar si estamos logeados 
-                // Un indicaba es si existe el botón "Cerrar Sesión" en la barra de nav.
-                if (document.querySelector('a[href="index.php?logout"]')) {
-                    window.location.href = 'index.php?logout=true&inactivity=1';
-                }
-            }, TIMEOUT_LIMIT);
-        }
-
-        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evt => 
-            document.addEventListener(evt, resetTimer, true)
-        );
-        resetTimer();
     </script>
     <script src="<?= BASE_URL ?>/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Scripts adicionales por vista -->
+    <?php if (isset($pageScripts) && is_array($pageScripts)): ?>
+        <?php foreach ($pageScripts as $script): ?>
+            <script src="<?= BASE_URL ?><?= $script ?>"></script>
+        <?php endforeach; ?>
+    <?php endif; ?>
 </body>
 </html>

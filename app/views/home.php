@@ -7,7 +7,8 @@
                 <h1 class="display-3 fw-bold mb-3 text-shadow fluido-entrada retraso-2" style="text-shadow: 0 10px 20px rgba(0,0,0,0.5);">Educacion de Excelencia</h1>
                 <p class="fs-4 fw-light shadow-sm fluido-entrada retraso-3">Formando profesionales para la construccion de una nueva sociedad.</p>
                 <div class="mt-4 fluido-entrada retraso-4">
-                    <a href="<?= BASE_URL ?>?register" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-bold">Inscripciones</a>
+                    <button class="btn btn-light btn-lg px-5 py-3 rounded-pill shadow-lg fw-bold me-3" style="color: var(--color-principal);">Descubre Mas</button>
+                    <a href="index.php?route=register" class="btn btn-outline-light btn-lg px-5 py-3 rounded-pill fw-bold">Inscripciones</a>
                 </div>
             </div>
         </div>
@@ -57,7 +58,7 @@
             
             <div class="d-flex flex-wrap flex-lg-nowrap justify-content-center gap-4 gap-lg-5 py-4 px-2">
                 <div class="text-center" style="width: 160px;">
-                    <a href="index.php?id=bolivar" class="text-decoration-none transition-hover">
+                    <a href="index.php?route=heroe&id=bolivar" class="text-decoration-none transition-hover">
                         <div class="envoltorio-avatar-heroe mb-3">
                             <img src="<?= BASE_URL ?>/assets/img/heroes/simon_bolivar.png" class="avatar-heroe" alt="Simon Bolivar">
                         </div>
@@ -66,7 +67,7 @@
                 </div>
                 
                 <div class="text-center" style="width: 160px;">
-                    <a href="index.php?id=miranda" class="text-decoration-none transition-hover">
+                    <a href="index.php?route=heroe&id=miranda" class="text-decoration-none transition-hover">
                         <div class="envoltorio-avatar-heroe mb-3">
                             <img src="<?= BASE_URL ?>/assets/img/heroes/francisco_de_miranda.png" class="avatar-heroe" alt="Francisco de Miranda">
                         </div>
@@ -75,7 +76,7 @@
                 </div>
                 
                 <div class="text-center" style="width: 160px;">
-                    <a href="index.php?id=sucre" class="text-decoration-none transition-hover">
+                    <a href="index.php?route=heroe&id=sucre" class="text-decoration-none transition-hover">
                         <div class="envoltorio-avatar-heroe mb-3">
                             <img src="<?= BASE_URL ?>/assets/img/heroes/antonio_jose_de_sucre.png" class="avatar-heroe" alt="Antonio Jose de Sucre">
                         </div>
@@ -84,7 +85,7 @@
                 </div>
                 
                 <div class="text-center" style="width: 160px;">
-                    <a href="index.php?id=urdaneta" class="text-decoration-none transition-hover">
+                    <a href="index.php?route=heroe&id=urdaneta" class="text-decoration-none transition-hover">
                         <div class="envoltorio-avatar-heroe mb-3">
                             <img src="<?= BASE_URL ?>/assets/img/heroes/rafael_urdaneta.png" class="avatar-heroe" alt="Rafael Urdaneta">
                         </div>
@@ -93,7 +94,7 @@
                 </div>
                 
                 <div class="text-center" style="width: 160px;">
-                    <a href="index.php?id=zamora" class="text-decoration-none transition-hover">
+                    <a href="index.php?route=heroe&id=zamora" class="text-decoration-none transition-hover">
                         <div class="envoltorio-avatar-heroe mb-3">
                             <img src="<?= BASE_URL ?>/assets/img/heroes/ezequiel_zamora.png" class="avatar-heroe" alt="Ezequiel Zamora">
                         </div>
@@ -102,7 +103,7 @@
                 </div>
 
                 <div class="text-center" style="width: 160px;">
-                    <a href="index.php?id=chavez" class="text-decoration-none transition-hover">
+                    <a href="index.php?route=heroe&id=chavez" class="text-decoration-none transition-hover">
                         <div class="envoltorio-avatar-heroe mb-3">
                             <img src="<?= BASE_URL ?>/assets/img/heroes/hugo_chavez.png" class="avatar-heroe" alt="Hugo Chavez">
                         </div>
@@ -147,7 +148,7 @@
                     </label>
 
                     <label for="v3" class="elemento-lista-video">
-                        <img src="<?= BASE_URL ?>/assets/img/banners/noticia_principal.png" class="miniatura-lista-video" alt="Miniatura 3">
+                        <img src="<?= BASE_URL ?>/assets/img/noticias/noticia_principal.jpg" class="miniatura-lista-video" alt="Miniatura 3">
                         <div>
                             <span class="badge bg-danger mb-1 insignia-reproduccion" style="font-size: 10px;">En Reproduccion</span>
                             <h6 class="fw-bold mb-1 text-dark titulo-video" style="font-size: 14px;">Protocolo de Aula UNEFA</h6>

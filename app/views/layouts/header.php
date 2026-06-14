@@ -9,7 +9,7 @@
     <link href="<?= BASE_URL ?>/css/login.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/css/registro.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/css/dashboard.css" rel="stylesheet">
-    <link href="<?= BASE_URL ?>/css/lista-estudiantes.css" rel="stylesheet">
+    <link href="<?= BASE_URL ?>/css/listas.css" rel="stylesheet">
     <link href="<?= BASE_URL ?>/assets/icons/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
@@ -36,43 +36,20 @@
         <div class="collapse navbar-collapse justify-content-end" id="mainNav">
             <ul class="navbar-nav align-items-center gap-1">
                 <li class="nav-item"><a class="enlace-navegacion nav-link" href="index.php"><i class="bi bi-house-fill me-1"></i>Inicio</a></li>
-<?php if ($authPayload): ?>
-                    <?php 
-                        $dashboardLink = 'index.php?dashboard_estudiante';
-                        if ($authPayload['role'] === 'Admin') $dashboardLink = 'index.php?dashboard_admin';
-                        if ($authPayload['role'] === 'Teacher') $dashboardLink = 'index.php?dashboard_profesor';
-                    ?>
-                    <li class="nav-item">
-                        <a href="<?= $dashboardLink ?>" class="boton-primario-personalizado btn btn-sm px-4 py-2 rounded-pill fw-bold">
-                            <i class="bi bi-speedometer2 me-2"></i>Ir al Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item ms-2">
-                        <a href="index.php?logout" class="btn btn-outline-danger btn-sm px-3 py-2 rounded-pill fw-bold">
-                            <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
-                        </a>
-                    </li>
-                <?php else: ?>
-                    <li class="nav-item ms-lg-3">
-                        <a href="index.php?login" class="boton-primario-personalizado btn btn-sm px-4 py-2 rounded-pill fw-bold">
-                            <i class="bi bi-person-lock me-2"></i>Entrar al Sistema
-                        </a>
-                    </li>
-                <?php endif; ?>
+                <li class="nav-item ms-lg-3">
+                    <a href="index.php?route=login" class="boton-primario-personalizado btn btn-sm px-4 py-2 rounded-pill fw-bold">
+                        <i class="bi bi-person-lock me-2"></i>Entrar al Sistema
+                    </a>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
 
-<?php if (!$authPayload): ?>
-<div class="redes-sociales-flotantes">
-    <a href="https://x.com/Unefa_VEN?t=FhK2uslLRmCrIa9sjQIEEA&s=09" target="_blank" class="red-x"><img src="<?= BASE_URL ?>/assets/img/redes/X-Twitter.webp" alt="X"></a>
-    <a href="https://www.instagram.com/unefa_ve?igsh=MXJvcjFkMXJ5Z3NzMg%3D%3D" target="_blank" class="red-ig"><img src="<?= BASE_URL ?>/assets/img/redes/Instagram.webp" alt="Instagram"></a>
-    <a href="https://www.facebook.com/share/1BKuAut1dg/" target="_blank" class="red-fb"><img src="<?= BASE_URL ?>/assets/img/redes/Facebook.webp" alt="Facebook"></a>
-    <a href="https://www.youtube.com/channel/UCU1YFZgV-ENQkfHRspsK9nA" target="_blank" class="red-yt"><img src="<?= BASE_URL ?>/assets/img/redes/Youtube.webp" alt="YouTube"></a>
-    <a href="https://www.tiktok.com/@unefa_ve?_t=8iwcWCLFEAA&_r=1" target="_blank" class="red-tk"><img src="<?= BASE_URL ?>/assets/img/redes/Tiktok.webp" alt="TikTok"></a>
-</div>
-<?php endif; ?>
-
-
-
+    <div class="redes-sociales-flotantes px-2">
+        <a href="https://x.com/Unefa_VEN?t=FhK2uslLRmCrIa9sjQIEEA&s=09" target="_blank" class="red-x"><img src="<?= BASE_URL ?>/assets/img/redes/X-Twitter.webp" alt="X"></a>
+        <a href="https://www.instagram.com/unefa_ve?igsh=MXJvcjFkMXJ5Z3NzMg%3D%3D" target="_blank" class="red-ig"><img src="<?= BASE_URL ?>/assets/img/redes/Instagram.webp" alt="Instagram"></a>
+        <a href="https://www.facebook.com/share/1BKuAut1dg/" target="_blank" class="red-fb"><img src="<?= BASE_URL ?>/assets/img/redes/Facebook.webp" alt="Facebook"></a>
+        <a href="https://www.youtube.com/channel/UCU1YFZgV-ENQkfHRspsK9nA" target="_blank" class="red-yt"><img src="<?= BASE_URL ?>/assets/img/redes/Youtube.webp" alt="YouTube"></a>
+        <a href="https://www.tiktok.com/@unefa_ve?_t=8iwcWCLFEAA&_r=1" target="_blank" class="red-tk"><img src="<?= BASE_URL ?>/assets/img/redes/Tiktok.webp" alt="TikTok"></a>
+    </div>
