@@ -1,124 +1,108 @@
 <?php
-//AttendanceService.php
+// app/services/AttendanceService.php
+
 class AttendanceService {
+    private $db;
     private $attendanceModel;
     private $classSessionModel;
     private $enrollmentModel;
 
-    // El constructor recibe los modelos mediante inyección de dependencias para el Autoload
-    public function __construct($attendanceModel, $classSessionModel, $enrollmentModel) {
+    // Recibimos la conexión y los modelos ya instanciados desde el controlador (Ideal para el Autoload)
+    public function __construct($database_connection, $attendanceModel, $classSessionModel, $enrollmentModel) {
+        $this->db = $database_connection;
         $this->attendanceModel = $attendanceModel;
         $this->classSessionModel = $classSessionModel;
         $this->enrollmentModel = $enrollmentModel;
     }
 
     /**
-     * Lógica centralizada para procesar el escaneo del código QR (Endpoint 5)
+     * LÓGICA CENTRAL PARA EL ESCANEO DEL CÓDIGO QR (ENDPOINT 5)
+     * Coordina la validación del token, sesión de clase, inscripción activa y registro.
      */
     public function processQrScan($qr_token, $section_id) {
-        if (!$section_id) {
-            return [
-                'success' => false,
-                'error_code' => 'INVALID_SECTION',
-                'message' => 'La sección seleccionada no es válida.'
-            ];
-        }
-
-        // 1. Traducir el token QR al ID del estudiante (Tabla qr_credential)
+        // 1. Traducir el token del QR al ID del estudiante (Seguridad de Gabriel Cobos)
         $student_id = $this->attendanceModel->getStudentIdByToken($qr_token);
         if (!$student_id) {
             return [
-                'success' => false, 
-                'error_code' => 'INVALID_QR',
-                'message' => 'Código QR inválido, bloqueado o expirado.'
+                'success' => false,
+                'message' => 'El código QR es inválido, expiró o no se encuentra activo.'
             ];
         }
 
-        // 2. Buscar la sesión en curso ('In Progress') para el día de hoy
+        // 2. Verificar que exista una sesión de clase activa ('In Progress') para hoy
         $activeSession = $this->classSessionModel->getActiveSession($section_id);
-        
         if (!$activeSession) {
-            // AUTO-INCIAR SESIÓN si no hay una activa para hoy
-            $newSessionId = $this->classSessionModel->createSession($section_id);
-            if (!$newSessionId) {
-                return [
-                    'success' => false, 
-                    'error_code' => 'SESSION_CREATE_ERROR',
-                    'message' => 'No hay sesión activa y no se pudo iniciar una automáticamente.'
-                ];
-            }
-            $session_id = $newSessionId;
-        } else {
-            $session_id = $activeSession['id'];
+            return [
+                'success' => false,
+                'message' => 'No hay ninguna sesión de clase activa hoy para esta sección.'
+            ];
         }
+        $session_id = $activeSession['id'];
 
-        // 3. Verifica que el estudiante esté realmente inscrito y activo en esta sección
+        // 3. Verificar si el estudiante está realmente inscrito y con estado 'Active'
         if (!$this->enrollmentModel->verifyStudentEnrollment($student_id, $section_id)) {
             return [
-                'success' => false, 
-                'error_code' => 'NOT_ENROLLED',
-                'message' => 'El estudiante no se encuentra inscrito o activo en esta sección.'
+                'success' => false,
+                'message' => 'Acceso denegado. Tu inscripción está en espera de aprobación por el profesor o inactiva.'
             ];
         }
 
-        // 4. Registrar la presencia en la base de datos (con ON DUPLICATE KEY UPDATE)
-        $register = $this->attendanceModel->registerPresence($session_id, $student_id);
-        if (!$register) {
+        // 4. Registrar o actualizar la asistencia del estudiante a 'Present'
+        $registered = $this->attendanceModel->registerQrAttendance($session_id, $student_id);
+        if (!$registered) {
             return [
-                'success' => false, 
-                'error_code' => 'DB_INSERT_ERROR',
-                'message' => 'Error al registrar la asistencia en la base de datos.'
+                'success' => false,
+                'message' => 'Hubo un error interno al asentar la asistencia en el servidor.'
             ];
         }
 
-        // 5. Obtener los datos cruzados con 'profile' para retornar al profesor
+        // 5. Obtener los datos del perfil del alumno para retornarlos en vivo al panel del profesor
         $student_info = $this->attendanceModel->getScannedStudentInfo($session_id, $student_id);
-
-        if (!$student_info) {
-            return [
-                'success' => false, 
-                'error_code' => 'PROFILE_NOT_FOUND',
-                'message' => 'Asistencia registrada, pero no se encontraron datos del perfil del alumno.'
-            ];
-        }
-
+        
         return [
             'success' => true,
             'message' => 'Asistencia registrada con éxito.',
-            'data' => [
-                'student_name' => $student_info['student_name'],
-                'status' => $student_info['status']
-            ]
+            'data' => $student_info
         ];
     }
 
     /**
-     * Lógica para cerrar la sesión de clase de forma segura (Endpoint 6)
+     * LÓGICA CENTRAL: CIERRE DE SESIÓN DE CLASE
+     * Cierra la sesión viva y ejecuta la inserción masiva de ausentes bajo una transacción segura.
      */
-    public function closeClassSession($session_id, $section_id) {
-        // 1. Cambiar el estado de la clase a cerrado guardando el tiempo actual en 'actual_end_time'
-        $closed = $this->classSessionModel->closeSession($session_id);
-        if (!$closed) {
+    public function closeSessionAndMarkAbsents($session_id, $section_id) {
+        try {
+            // Iniciamos la transacción para proteger la integridad de los datos
+            $this->db->beginTransaction();
+
+            // 1. Cerrar manualmente el registro de la clase (pasa a 'Manual' e inyecta CURTIME())
+            $closed = $this->classSessionModel->closeSessionManually($session_id);
+            if (!$closed) {
+                $this->db->rollBack();
+                return [
+                    'success' => false,
+                    'message' => 'La sesión de clase no pudo ser cerrada, no existe o ya se encuentra finalizada.'
+                ];
+            }
+
+            // 2. Ejecutar la inyección masiva de inasistencias en lote
+            $this->attendanceModel->bulkAbsentForUnregisteredStudents($session_id, $section_id);
+
+            // Si todo salió bien, guardamos los cambios definitivamente
+            $this->db->commit();
+            
             return [
-                'success' => false, 
-                'error_code' => 'SESSION_NOT_MODIFIED',
-                'message' => 'La sesión ya está cerrada, no existe o no se pudo actualizar.'
+                'success' => true,
+                'message' => 'Sesión de clase cerrada exitosamente. Los alumnos ausentes fueron registrados.'
+            ];
+
+        } catch (Exception $e) {
+            // Si algo falla en el proceso, deshacemos todo para evitar datos corruptos
+            $this->db->rollBack();
+            return [
+                'success' => false,
+                'message' => 'Fallo transaccional al cerrar la sesión: ' . $e->getMessage()
             ];
         }
-
-        // 2. Ejecutar la inserción masiva de inasistencias en la tabla 'attendance'
-        $bulkAbsent = $this->attendanceModel->bulkMarkAbsent($session_id, $section_id);
-        if (!$bulkAbsent) {
-            return [
-                'success' => false, 
-                'error_code' => 'BULK_ABSENT_ERROR',
-                'message' => 'La clase se cerró, pero hubo un problema al procesar los ausentes del sistema.'
-            ];
-        }
-
-        return [
-            'success' => true,
-            'message' => 'Sesión cerrada exitosamente y alumnos inasistentes registrados.'
-        ];
     }
 }

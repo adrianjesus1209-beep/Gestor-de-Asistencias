@@ -220,10 +220,12 @@ if ($showLogin) {
     $classSessionModel = new ClassSession($db);
 
     $teacherController = new TeacherController(
-        new Section($db),
+        $db,
+        $sectionModel,
         $enrollmentModel,
         $classSessionModel,
-        new AttendanceService($attendanceModel, $classSessionModel, $enrollmentModel)
+        $attendanceModel,
+        new AttendanceService($db, $attendanceModel, $classSessionModel, $enrollmentModel)
     );
 
     if ($_GET['api'] === 'update_enrollment') {
@@ -242,7 +244,7 @@ if ($showLogin) {
                 exit;
             }
         }
-        $teacherController->updateEnrollmentStatus($input);
+        $teacherController->updateEnrollmentStatus((int) $authPayload['user_id']);
     } elseif ($_GET['api'] === 'scan_qr') {
         $input = json_decode(file_get_contents("php://input"), true);
         $sectionId = intval($input['section_id'] ?? 0);
@@ -252,7 +254,7 @@ if ($showLogin) {
             echo json_encode(['success' => false, 'message' => 'Acceso denegado.']);
             exit;
         }
-        $teacherController->scanQrCode($input);
+        $teacherController->scanQr((int) $authPayload['user_id']);
     } elseif ($_GET['api'] === 'toggle_attendance') {
         $input = json_decode(file_get_contents("php://input"), true);
         $sectionId = intval($input['section_id'] ?? 0);
@@ -262,7 +264,7 @@ if ($showLogin) {
             echo json_encode(['success' => false, 'message' => 'Acceso denegado.']);
             exit;
         }
-        $teacherController->toggleAttendanceManual($input);
+        $teacherController->manualOverride((int) $authPayload['user_id']);
     } elseif ($_GET['api'] === 'enroll_student') {
         $input = json_decode(file_get_contents("php://input"), true);
         $student_id  = intval($input['student_id'] ?? 0);
