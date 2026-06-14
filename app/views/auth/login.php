@@ -10,7 +10,7 @@
             <p class="login-subtitle">Sistema de Gestión de Asistencia</p>
         </div>
         
-        <form action="index.php" method="post" id="loginForm">
+        <form>
             <div class="form-group">
                 <label class="login-label">Correo Electrónico</label>
                 <div class="login-input-group">
@@ -19,10 +19,8 @@
                     </span>
                     <input 
                         type="email" 
-                        name="email"
                         class="login-input" 
-                        placeholder="correo@unefa.edu.ve"
-                        required
+                        placeholder="correo@gmail.com"
                     >
                 </div>
             </div>
@@ -35,35 +33,36 @@
                     </span>
                     <input 
                         type="password" 
-                        name="password"
                         class="login-input" 
                         placeholder="Ingrese su contraseña"
-                        required
                     >
                 </div>
             </div>
             
             <div class="login-action">
-                <button type="submit" class="btn boton-primario-personalizado w-100 py-3 fw-bold text-center rounded-pill">
+                <a href="index.php?route=dashboard" 
+                    class="btn boton-primario-personalizado py-2 fw-bold text-center">
                     Ingresar
-                </button>
+                </a>
             </div>
         </form>
         
         <div class="login-footer">
             <p class="login-footer-text">
                 ¿No posee una cuenta? 
-                <a href="index.php?register" class="login-link">Registrarse</a>
+                <a href="index.php?route=register" class="login-link">Registrarse</a>
+            </p>
+            <hr>
+            <p class="login-footer-text">
+                ¿Olvidaste tu contraseña? 
+                <a href="index.php?route=change-password" class="login-link">Cambiar contraseña</a>
             </p>
         </div>
         
         <div class="login-footer mt-extra">
-            <a href="index.php" class="login-link small">
+            <a href="index.php?route=home" class="login-link small">
                 <i class="bi bi-arrow-left"></i> Volver al inicio
             </a>
         </div>
     </div>
 </div>
-
-<script src="<?= BASE_URL ?>/SweetAlert2/sweetalert2.all.min.js"></script>
-<script src="<?= BASE_URL ?>/assets/js/login.js"></script>
